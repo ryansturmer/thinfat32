@@ -1,0 +1,32 @@
+#!/bin/sh
+
+
+case "$1" in
+   'make')
+   	rm -rf test.fat32
+	echo "Creating file..."  
+	dd if=/dev/zero of=test.fat32 count=204800 
+	ls -lah test.fat32 
+	echo "Formatting file..." 
+	/sbin/mkdosfs test.fat32 -s2 -F32
+	chmod a+rw test.fat32
+	echo "Done." ;;
+   'mount')
+	rm -rf fs
+	mkdir fs
+	losetup /dev/loop0 ./test.fat32
+	mount -tvfat /dev/loop0 ./fs ;;
+    'unmount')
+	umount ./fs
+	losetup -d /dev/loop0 ;;
+    'populate')
+        cd fs
+	echo "Medium sized filename on this one." > thisisamidsizefilename.txt
+        mkdir subdir
+	echo "This is file A" > a.txt
+	echo "This is file B" > b.txt
+	echo "This is a long filename!" > subdir/this\ is\ a\ super\ long\ filename\ with\ spaces.txt
+        echo "Hello, World" > subdir/c.txt ;;
+    *)
+      echo "usage $0 make|mount|unmount" ;;
+esac
