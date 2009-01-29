@@ -4,7 +4,7 @@
 CFLAGS = -g -fpack-struct
 LIBS =
 LDFLAGS = 
-INCLUDES = ./include 
+INCLUDES = ./src/include 
 
 SRC_DIR = ./src
 OBJ_DIR = ./obj
