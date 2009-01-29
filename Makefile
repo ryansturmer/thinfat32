@@ -14,7 +14,7 @@ CC = gcc
 LD = ld
 DEBUGGER = ddd
 
-SRC = main.c fat32.c fat32_ui.c
+SRC = main.c thinfat32.c fat32_ui.c
 OBJS = $(SRC:%.c=$(OBJ_DIR)/%.o)
 
 VPATH = $(SRC_DIR)

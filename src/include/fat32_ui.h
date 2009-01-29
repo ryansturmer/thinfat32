@@ -1,6 +1,6 @@
 #ifndef __FAT32_UI_H
 #define __FAT32_UI_H
-#include "fat32.h"
+#include "thinfat32.h"
 
 void printBPB(BPB_struct *s);
 void print_sector(unsigned char *sector);

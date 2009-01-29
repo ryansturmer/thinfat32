@@ -1,4 +1,4 @@
-#include "fat32.h"
+#include "thinfat32.h"
 #include "fat32_ui.h"
 #include <stdio.h>
 #include <stdlib.h>
