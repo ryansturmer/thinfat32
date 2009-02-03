@@ -14,11 +14,11 @@ CC = gcc
 LD = ld
 DEBUGGER = ddd
 
-SRC = main.c thinfat32.c fat32_ui.c
+SRC = thinfat32.c fat32_ui.c tests.c
 OBJS = $(SRC:%.c=$(OBJ_DIR)/%.o)
 
 VPATH = $(SRC_DIR)
-all: begin main end
+all: begin tests end
 
 begin:
 	@echo 
@@ -28,6 +28,7 @@ begin:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(BUILD_DIR)
 	mkdir -p $(DIST_DIR)
+	@echo
 end:
 	@echo 
 	@echo "Done."
@@ -38,21 +39,32 @@ $(OBJS) : $(OBJ_DIR)/%.o : %.c
 	@echo "Compiling C File" $<
 	@echo "----------------"
 	$(CC) -I$(INCLUDES) -c $(CFLAGS) $< -o $@ 
-
-main : $(OBJS)
 	@echo
-	@echo "Creating Executable"
-	@echo "-------------------"
-	$(CC) $(CFLAGS) $(OBJS) --output $(BUILD_DIR)/$@ $(LDFLAGS)
+
+tests : $(OBJS)
+	@echo
+	@echo "Creating Test Fixture"
+	@echo "---------------------"
+	$(CC) $(CFLAGS) $(OBJS)  --output $(BUILD_DIR)/$@ $(LDFLAGS)
+	@echo
 clean:  
 	@echo
 	@echo "Cleaning the Build"
 	@echo "------------------"	
 	rm -rf $(OBJS) core fs $(BUILD_DIR)/* $(DIST_DIR)/fat32.tar.gz
+	@echo
+
+test : tests
+	@echo
+	@echo "Running Tests..."
+	@echo "----------------"
+	make rebuild
+	./build/tests
+	@echo
 
 dist: clean
 	tar -cv src scripts Makefile | gzip -c > $(DIST_DIR)/fat32.tar.gz
-
+	@echo
 #
 # Targets for creating and manipulating the test filesystem
 #

@@ -1,15 +1,19 @@
 #include "thinfat32.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "fat32_ui.h"
 
 #define NO_ERROR 0
 #define FILE_OPEN_ERROR 1
+#define DATA_READ_ERROR 2
+#define DATA_WRITE_ERROR 3
+#define DATA_MISMATCH_ERROR 4
 
 // Tests
 int basic_read(char *input_fle, char *expected);
-int basic_write(char *input_file, char *write_string) {
-int basic_append(char *input_file, char *write_string) {
+int basic_write(char *input_file, char *write_string);
+int basic_append(char *input_file, char *write_string);
 
 int main(int argc, char **argv) {
 	TFFile *fp;
@@ -19,11 +23,11 @@ int main(int argc, char **argv) {
 	printf("FAT32 Filesystem Test\n");
 	printf("-----------------------\n");
 	tf_init();
-	if(rc = test_basic_write("/test0.txt", "Hello, World!")) {
+	if(rc = test_basic_write("/subdir/test_longfilename0.txt", "Hello, World!")) {
 		printf("Basic write test failed with error code 0x%x\n", rc) ;
 	}else { printf("Basic write test PASSED.\n"); }
 
-	if(rc = test_basic_read("/test0.txt", "Hello, World!")) {
+	if(rc = test_basic_read("/subdir/test_longfilename0.txt", "Hello, World!")) {
 		printf("Basic read test failed with error code 0x%x\n", rc) ;
 	}else { printf("Basic read test PASSED.\n"); }
 
@@ -43,8 +47,8 @@ int test_basic_read(char *input_file, char *expected) {
 	int i=0;
 
 	if(fp) {
-		while(!tf_fread(&(data[i]), size, fp)) {i+=1 };
-		data[i] = '\x00';
+		while(!tf_fread(&(data[i]), 1, fp)) {i+=1;}
+		data[i+1] = '\x00';
 		if(strcmp(data, expected)) {
 			tf_fclose(fp);
 			return DATA_MISMATCH_ERROR;
