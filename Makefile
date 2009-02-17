@@ -83,4 +83,11 @@ populate:
 rebuild:
 	make unmount; make create; make mount; make populate; make unmount;
 
+debug: tests
+	@echo
+	@echo "Starting Debugger..."
+	@echo "--------------------"
+	$(DEBUGGER) ./build/tests
+	@echo
+
 .PHONY : begin end clean create mount unmount populate rebuild debug

@@ -23,11 +23,11 @@ int main(int argc, char **argv) {
 	printf("FAT32 Filesystem Test\n");
 	printf("-----------------------\n");
 	tf_init();
-	if(rc = test_basic_write("/subdir/test_longfilename0.txt", "Hello, World!")) {
+	if(rc = test_basic_write("/test_longfilename0.txt", "Hello, World!")) {
 		printf("Basic write test failed with error code 0x%x\n", rc) ;
 	}else { printf("Basic write test PASSED.\n"); }
 
-	if(rc = test_basic_read("/subdir/test_longfilename0.txt", "Hello, World!")) {
+	if(rc = test_basic_read("/test_longfilename0.txt", "Hello, World!")) {
 		printf("Basic read test failed with error code 0x%x\n", rc) ;
 	}else { printf("Basic read test PASSED.\n"); }
 

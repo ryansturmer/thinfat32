@@ -399,6 +399,9 @@ int tf_place_lfn_chain(TFFile *fp, char *filename) {
 		tf_create_lfn_entry(last_strptr, &entry);
 		entry.lfn.sequence_number = seq;
 		entry.lfn.checksum = tf_lfn_checksum(sfn);
+		#ifdef TF_DEBUG
+		printf("[DEBUG] Placing LFN chain entry @ %d\n", fp->pos);
+		#endif
 		tf_fwrite(&entry, sizeof(FatFileEntry), 1, fp);
 		seq = ((seq & ~0x40)-1);
 		last_strptr -= 13;	
@@ -421,6 +424,7 @@ int tf_create(char *filename) {
 	do {
 		//"seek" to the end
 		tf_fread(&entry, sizeof(FatFileEntry), fp);
+		printf("Skipping to end of file... %d\n", fp->pos);
 	} while(entry.msdos.filename[0] != '\x00');
 	// Back up one entry, this is where we put the new filename entry
 	tf_fseek(fp, -sizeof(FatFileEntry), fp->pos);
@@ -442,8 +446,8 @@ int tf_create(char *filename) {
 	tf_place_lfn_chain(fp, temp);
 	tf_shorten_filename(entry.msdos.filename, temp);
 	tf_fwrite(&entry, sizeof(FatFileEntry), 1, fp);
-	//memset(&entry, 0, sizeof(FatFileEntry));
-	entry.msdos.filename[0] = '\x00';
+	memset(&entry, 0, sizeof(FatFileEntry));
+	//entry.msdos.filename[0] = '\x00';
 	tf_fwrite(&entry, sizeof(FatFileEntry), 1, fp);
 	tf_fclose(fp);
 	return 0;
@@ -481,8 +485,8 @@ TFFile *tf_fnopen(char *filename, const char *mode, int n) {
 	fp->attributes = 0x10;
 	fp->pos=0;
 	fp->flags |= TF_FLAG_ROOT;
-
-	fp->size=tf_info.rootDirectorySize;
+	fp->size = 0xffffffff;
+	//fp->size=tf_info.rootDirectorySize;
 	fp->mode=TF_MODE_READ | TF_MODE_WRITE | TF_MODE_OVERWRITE;
 
 
@@ -622,6 +626,9 @@ int tf_compare_filename_segment(FatFileEntry *entry, char *name) {
 	char reformatted_file[16];
 	char *entryname = entry->msdos.filename;
 	if(entry->msdos.attributes != 0x0f) {
+		#ifdef TF_DEBUG
+		printf("[DEBUG] 8.3 Segment:\n");
+		#endif
 		// Filename
 		j=0;
 		for(i=0; i<8; i++) {
@@ -638,6 +645,9 @@ int tf_compare_filename_segment(FatFileEntry *entry, char *name) {
 		}
 	}
 	else {
+		#ifdef TF_DEBUG
+		printf("[DEBUG] LFN Segment:\n");
+		#endif
 		j=0;
 		for(i=0; i<5; i++) {
 			reformatted_file[j++] = (char) entry->lfn.name1[i];
@@ -652,7 +662,7 @@ int tf_compare_filename_segment(FatFileEntry *entry, char *name) {
 	reformatted_file[j++] = '\x00';
 	while((name[i] != '/') && (name[i] != '\x00')) i++;
 	#ifdef TF_DEBUG
-	printf("[DEBUG] Comparing filename segment '%s' (given) to '%s' (from disk) (%d)\n", name, reformatted_file,i);
+	printf("[DEBUG] Comparing filename segment '%s' (given) to '%s' (from disk)\n", name, reformatted_file);
 	#endif
 	if(strncasecmp(name, reformatted_file, i > 13 ? 13 : i)) {
 		return 0; }
@@ -673,7 +683,11 @@ int tf_compare_filename(TFFile *fp, char *name) {
 	int lfn_entries;
 	
 	// Read a single directory entry
+	#ifdef TF_DEBUG
+	printf("[DEBUG] Comparing filename @ %d\n", fp->pos);
+	#endif
 	tf_fread(&entry, sizeof(FatFileEntry), fp);
+	
 	// Fail if its bogus
 	if(entry.msdos.filename[0] == 0x00) return -1;
 
@@ -700,7 +714,7 @@ int tf_compare_filename(TFFile *fp, char *name) {
 			// Compare it.  If it's not a match, jump to the end of the chain, return failure
 			// Otherwise, continue looping until there's no entries left.
 			if(!tf_compare_filename_segment(&entry, compare_name)) {
-				tf_fseek(fp, ((lfn_entries-i-2))*sizeof(FatFileEntry), fp->pos);
+				tf_fseek(fp, ((lfn_entries-i-1))*sizeof(FatFileEntry), fp->pos);
 				return 0;	
 			}
 			tf_fseek(fp, -sizeof(FatFileEntry), fp->pos);
@@ -718,8 +732,15 @@ int tf_fread(char *dest, int size, TFFile *fp) {
 		tf_fetch(tf_first_sector(fp->currentCluster) + (fp->currentByte / 512));
 		*dest++ = tf_info.buffer[fp->currentByte % 512];
 		size--;
+		if(fp->attributes & TF_ATTR_DIRECTORY) {
+			//printf("READING DIRECTORY");
+			if(tf_fseek(fp, 0, fp->pos+1)) {
+				return -1;
+			}
+		} else {
 		if(tf_fseek(fp, 0, fp->pos +1)) {
 			return -1;	
+		}
 		}
 	}
 	return 0;
@@ -767,6 +788,7 @@ TFFile *tf_parent(char *filename, const char *mode) {
 	printf("[DEBUG] Opening parent of '%s'\n", filename);
 	#endif
 	f2 = strrchr(filename, '/');
+	printf("%d\n", (int) (f2-filename)); 
 	return tf_fnopen(filename, "rw", (int)(f2-filename));
 }
 
