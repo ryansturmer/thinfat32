@@ -291,6 +291,7 @@ char upper(char c) {
  * TODO: This should return something, an error code for conversion failure.
  * TODO: This should handle special chars etc.
  * TODO: Test for short filenames, (<7 characters)
+ * TODO: Modify this to use the basis name generation algorithm described in the FAT32 whitepaper.
  */
 void tf_shorten_filename(char *dest, char *src) {
 	int l = strlen(src);
@@ -311,6 +312,7 @@ void tf_shorten_filename(char *dest, char *src) {
 		*(dest++) = ' ';
 	}
 	src = strrchr(src, '.');
+	
 	if(*src != '\x00') src++;
 	while(1) {
 		if(i==9) break;
