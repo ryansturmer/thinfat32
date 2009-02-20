@@ -295,35 +295,51 @@ char upper(char c) {
  */
 void tf_shorten_filename(char *dest, char *src) {
 	int l = strlen(src);
-	int i;
-	i=0;
+	int i=0;
+    int lossy_flag=0;
+    #ifdef TF_DEBUG
+        char *orig_dest = dest;
+        char *orig_src = src;
+    #endif
+    // Copy the basename
 	while(1) {
-		if(i==6) break;
-		if((*src == '.') || (*src == '\x00'))break;
-		*(dest++) = upper(*(src++));
+		if(i==8) break;
+		if((i==6) || (*src == '.') || (*src == '\x00'))break;
+		if((*dest == ' '))  {lossy_flag = 1; } else {
+            *(dest++) = upper(*(src++));
+        }
 		i+=1;
-	}
-	if((i == 6) && (*src != '.')) {
+    }
+    // Funny tail if basename was too long
+    if(i==6) {
 		*(dest++) = '~';
 		*(dest++) = '1';
-	}
-	else {
-		*(dest++) = ' ';
-		*(dest++) = ' ';
-	}
+        i+=2;
+    }
+    // Or Not
+    else {
+        while(i<8) {
+            *(dest++) = ' ';
+            i++;
+        }
+    }
+
+    // Last . in the filename
 	src = strrchr(src, '.');
 	
-	if(*src != '\x00') src++;
-	while(1) {
-		if(i==9) break;
-		if(*src == '\x00') break;
+    *(dest++) = ' ';
+    *(dest++) = ' ';
+    *(dest++) = ' ';
+    *(dest++) = '\x00';
+    dest -= 4;
+    if(src != NULL) {
+        src +=1;
+	    while(i < 12) {
+		    if(*src == '\x00') break;
 		*(dest++) = upper(*(src++));
 		i+=1;
+        }
 	}
-	while(i < 9) {
-		*(dest++) = ' ';
-	}
-	*dest = '\x00';
 }
 
 /*
