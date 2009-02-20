@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
 /*
  * Open a file, read its contents, if the contents match, return 0
- * If the contents don't match, or any other error occurs, return 
+ *If the contents don't match, or any other error occurs, return 
  * an appropriate error code.
  */
 int test_basic_read(char *input_file, char *expected) {
