@@ -481,8 +481,9 @@ TFFile *tf_fopen(char *filename, const char *mode) {
 		if(strchr(mode, '+') || strchr(mode, 'w') || strchr(mode, 'a')) {
 		      tf_create(filename); 
 		}	
+		return tf_fnopen(filename, mode, strlen(filename));
 	}
-	return tf_fnopen(filename, mode, strlen(filename));
+	return fp;
 }
 
 //
