@@ -883,10 +883,12 @@ int tf_remove(char *filename) {
 	TFFile *fp;
 	FatFileEntry entry;
 	int rc;
+	uint32_t startCluster;
 
 	// Sanity check
 	fp = tf_fopen(filename, "r");
 	if(fp == NULL) return -1; // return an error if we're removing a file that doesn't exist
+	startCluster = fp->startCluster; // Remember first cluster of the file so we can remove the clusterchain
 	tf_fclose(fp);
 
 	// TODO Don't leave an orphaned LFN
@@ -904,7 +906,8 @@ int tf_remove(char *filename) {
 		fp->size-=sizeof(FatFileEntry);
 		fp->flags |= TF_FLAG_SIZECHANGED; 
 	}
-	tf_fclose(fp);	
+	tf_fclose(fp);
+	tf_free_clusterchain(startCluster); // Free the data associated with the file
 
 	return 0;
 
