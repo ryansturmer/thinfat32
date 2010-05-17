@@ -152,7 +152,8 @@ int tf_init() {
  */
 uint32_t tf_get_fat_entry(uint32_t cluster) {
 	uint32_t offset=cluster*4;
-	return tf_fetch(tf_info.reservedSectors + (offset/512)); // 512 is hardcoded bpb->bytesPerSector
+	tf_fetch(tf_info.reservedSectors + (offset/512)); // 512 is hardcoded bpb->bytesPerSector
+	return *((uint32_t *) &(tf_info.buffer[offset % 512]));
 }
 
 /*
@@ -172,7 +173,10 @@ int tf_set_fat_entry(uint32_t cluster, uint32_t value) {
 	int rc;
 	offset=cluster*4; // FAT32
 	rc = tf_fetch(tf_info.reservedSectors + (offset/512)); // 512 is hardcoded bpb->bytesPerSector
-	*((uint32_t *) &(tf_info.buffer[offset % 512])) = value;
+	if (*((uint32_t *) &(tf_info.buffer[offset % 512])) != value) {
+		tf_info.sectorFlags |= TF_FLAG_DIRTY; // Mark this sector as dirty
+		*((uint32_t *) &(tf_info.buffer[offset % 512])) = value;
+	}
 	return rc;
 }
 
