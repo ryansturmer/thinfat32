@@ -458,7 +458,7 @@ int tf_create(char *filename) {
 	entry.msdos.modifiedTime = 0;
 	entry.msdos.modifiedDate = 0;
 	entry.msdos.firstCluster = cluster & 0xffff;
-	entry.msdos.fileSize = 1;
+	entry.msdos.fileSize = 0;
 	temp = strrchr(filename, '/')+1;
 	printf("[DEBUG] FILENAME CONVERSION: %s\n", temp);
 	tf_place_lfn_chain(fp, temp);
