@@ -497,6 +497,8 @@ TFFile *tf_fnopen(char *filename, const char *mode, int n) {
 	TFFile *fp = tf_get_free_handle();
 	char myfile[256];
 	char *temp_filename = myfile;
+	uint32_t cluster;
+
 	strncpy(myfile, filename, n);
 	myfile[n] = 0;
 	fp->currentCluster=2;
@@ -533,7 +535,20 @@ TFFile *tf_fnopen(char *filename, const char *mode, int n) {
 		fp->mode |= TF_MODE_WRITE | TF_MODE_OVERWRITE;
 	}
 	if(strchr(mode, '+')) fp->mode |= TF_MODE_OVERWRITE | TF_MODE_WRITE;
-	if(strchr(mode, 'w'))  fp->mode |= TF_MODE_WRITE;
+	if(strchr(mode, 'w')) {
+		/* Opened for writing. Truncate file only if it's not a directory*/
+		if (!(fp->attributes & TF_ATTR_DIRECTORY)) {
+			fp->size = 0;
+			tf_unsafe_fseek(fp, 0, 0);
+			/* Free the clusterchain starting with the second one if the file
+			 * uses more than one */
+			if ((cluster = tf_get_fat_entry(fp->startCluster)) != TF_MARK_EOC32) {
+				tf_free_clusterchain(cluster);
+				tf_set_fat_entry(fp->startCluster, TF_MARK_EOC32);
+			}
+		}
+		fp->mode |= TF_MODE_WRITE;
+	}
 
 	strncpy(fp->filename, myfile, n);
  		
@@ -866,6 +881,7 @@ int tf_fflush(TFFile *fp) {
 			tf_fwrite(&entry, sizeof(FatFileEntry), 1, dir); // Write fatfile entry back to disk
 			tf_fclose(dir);
 		}
+		fp->flags &= ~TF_FLAG_SIZECHANGED;
 	}
 	#ifdef TF_DEBUG
 	printf("[DEBUG] Flushed.\n");
