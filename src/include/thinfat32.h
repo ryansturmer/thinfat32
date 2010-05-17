@@ -214,6 +214,7 @@ TFFile *tf_fopen(char *filename, const char *mode);
 int tf_fwrite(void *src, int size, int count, TFFile *fp);
 int tf_fputs(char *src, TFFile *fp);
 uint32_t tf_find_free_cluster();
+uint32_t tf_find_free_cluster_from(uint32_t c);
 
 // New Datas
 extern TFInfo tf_info;

@@ -594,20 +594,28 @@ int tf_unsafe_fseek(TFFile *fp, int32_t base, long offset) {
 	// If the cluster index matches the index we're already at, we don't need to look in the FAT
 	// If it doesn't match, we have to follow the linked list to arrive at the correct cluster 
 	if(cluster_idx != fp->currentClusterIdx) {
-		fp->currentClusterIdx = cluster_idx;
-		fp->currentCluster = fp->startCluster;
+		temp = cluster_idx;
+		/* Shortcut: If we are looking for a cluster that comes *after* the current we don't
+		 * need to start at the beginning */
+		if (cluster_idx > fp->currentClusterIdx) {
+			cluster_idx -= fp->currentClusterIdx;
+		} else {
+			fp->currentCluster = fp->startCluster;
+		}
+		fp->currentClusterIdx = temp;
 		while(cluster_idx > 0) {
 			// TODO Check file mode here for r/w/a/etc...
 			temp = tf_get_fat_entry(fp->currentCluster); // next, next, next
-			if(temp) fp->currentCluster = temp;
+			if(temp&0x0fffffff != mark) fp->currentCluster = temp;
 			else {
 				// We've reached the last cluster in the file (omg)
 				// If the file is writable, we have to allocate new space
 				// If the file isn't, our job is easy, just report an error
 				// Also, probably report an error if we're out of space
-				temp = tf_find_free_cluster();
+				temp = tf_find_free_cluster_from(fp->currentCluster);
 				tf_set_fat_entry(fp->currentCluster, temp); // Allocates new space
-				tf_set_fat_entry(temp, 0x0fffffff8); // Marks the new cluster as the last one 
+				tf_set_fat_entry(temp, mark); // Marks the new cluster as the last one
+				fp->currentCluster = temp;
 			}
 			cluster_idx--;
 			if(fp->currentCluster >= mark) {
@@ -917,6 +925,28 @@ uint32_t tf_find_free_cluster() {
 	}
 	#ifdef TF_DEBUG		
 	printf("[DEBUG] Free cluster number: %d\n", i);
+	#endif
+	return i;
+}
+
+/* Optimize search for a free cluster */
+uint32_t tf_find_free_cluster_from(uint32_t c) {
+	uint32_t i, entry;
+	#ifdef TF_DEBUG
+	printf("[DEBUG] Searching for a free cluster...\r\n");
+	#endif
+	for(i=c;i<tf_info.totalSectors; i++) {
+		entry = tf_get_fat_entry(i);
+		if((entry & 0x0fffffff) == 0) break;
+	}
+
+	/* We couldn't find anything here so search from the beginning */
+	if (i == tf_info.totalSectors) {
+		return tf_find_free_cluster();
+	}
+
+	#ifdef TF_DEBUG
+	printf("[DEBUG] Free cluster number: %d\r\n", i);
 	#endif
 	return i;
 }
