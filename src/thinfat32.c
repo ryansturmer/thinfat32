@@ -103,6 +103,25 @@ int tf_init() {
 	// Cast to a BPB, so we can extract relevant data
 	bpb = (BPB_struct *) tf_info.buffer;
 
+	/* Some sanity checks to make sure we're really dealing with FAT here
+	 * see fatgen103.pdf pg. 9ff. for details */
+
+	/* BS_jmpBoot needs to contain specific instructions */
+	if (!(bpb->BS_JumpBoot[0] == 0xEB && bpb->BS_JumpBoot[2] == 0x90) && !(bpb->BS_JumpBoot[0] == 0xE9))
+		return TF_ERR_BAD_FS_TYPE;
+
+	/* Only specific bytes per sector values are allowed
+	 * FIXME: Only 512 bytes are supported by thinfat at the moment */
+	if (bpb->BytesPerSector != 512)
+		return TF_ERR_BAD_FS_TYPE;
+
+	if (bpb->ReservedSectorCount == 0)
+		return TF_ERR_BAD_FS_TYPE;
+
+	/* Valid media types */
+	if ((bpb->Media != 0xF0) && ((bpb->Media < 0xF8) || (bpb->Media > 0xFF)))
+		return TF_ERR_BAD_FS_TYPE;
+
 	// See the FAT32 SPEC for how this is all computed
 	fat_size                  = (bpb->FATSize16 != 0) ? bpb->FATSize16 : bpb->FSTypeSpecificData.fat32.FATSize;
 	root_dir_sectors          = ((bpb->RootEntryCount*32) + (bpb->BytesPerSector-1))/(512); // The 512 here is a hardcoded bpb->bytesPerSector (TODO: Replace /,* with shifts?)
@@ -498,6 +517,9 @@ TFFile *tf_fnopen(char *filename, const char *mode, int n) {
 	char myfile[256];
 	char *temp_filename = myfile;
 	uint32_t cluster;
+
+	if (fp == NULL)
+		return NULL;
 
 	strncpy(myfile, filename, n);
 	myfile[n] = 0;
