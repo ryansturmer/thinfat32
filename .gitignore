@@ -1,0 +1,13 @@
+~*
+*.obj
+*.swp
+*.swo
+*.tmp
+*.bak
+.*
+*.fat32
+fs
+obj
+build
+dist
+
