@@ -14,11 +14,9 @@ case "$1" in
    'mount')
 	rm -rf fs
 	mkdir fs
-	losetup /dev/loop0 ./test.fat32
-	mount -tvfat /dev/loop0 ./fs ;;
+	mount -o loop -tvfat test.fat32 ./fs ;;
     'unmount')
-	umount ./fs
-	losetup -d /dev/loop0 ;;
+	sudo umount ./fs ;;
     'populate')
         cd fs
 	echo "Medium sized filename on this one." > thisisamidsizefilename.txt
@@ -28,5 +26,5 @@ case "$1" in
 	echo "This is a long filename!" > subdir/this\ is\ a\ super\ long\ filename\ with\ spaces.txt
         echo "Hello, World" > subdir/c.txt ;;
     *)
-      echo "usage $0 make|mount|unmount" ;;
+      echo "usage $0 make|mount|unmount|populate" ;;
 esac

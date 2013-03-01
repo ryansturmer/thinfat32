@@ -1,6 +1,3 @@
-
-#--- WARNING: NO USER EDITABLE CODE ABOVE THIS LINE ---#
-
 CFLAGS = -g -fpack-struct
 LIBS =
 LDFLAGS = 
@@ -80,8 +77,7 @@ unmount:
 populate:
 	sudo ./scripts/makefs populate
 
-rebuild:
-	make unmount; make create; make mount; make populate; make unmount;
+rebuild: unmount create mount populate unmount
 
 debug: tests
 	@echo
