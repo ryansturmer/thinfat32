@@ -35,8 +35,8 @@
 
 #ifdef TF_DEBUG
 typedef struct struct_TFStats {
-	unsigned long sector_reads;
-	unsigned long sector_writes;
+    unsigned long sector_reads;
+    unsigned long sector_writes;
 } TFStats;
 
     #define tf_printf(...) printf(__VA_ARGS__)
@@ -71,34 +71,34 @@ typedef struct struct_TFStats {
 // 4) The current sector in memory.  No sense reading it if it's already in memory!
 
 typedef struct struct_tfinfo {
-	// FILESYSTEM INFO PROPER
-	uint8_t type; // 0 for FAT16, 1 for FAT32.  FAT12 NOT SUPPORTED
-	uint8_t sectorsPerCluster;
-	uint32_t firstDataSector;
-	uint32_t totalSectors;
-	uint16_t reservedSectors;
-	// "LIVE" DATA
-	uint32_t currentSector;
-	uint8_t sectorFlags;
-	uint32_t rootDirectorySize;
-	uint8_t buffer[512];
+    // FILESYSTEM INFO PROPER
+    uint8_t type; // 0 for FAT16, 1 for FAT32.  FAT12 NOT SUPPORTED
+    uint8_t sectorsPerCluster;
+    uint32_t firstDataSector;
+    uint32_t totalSectors;
+    uint16_t reservedSectors;
+    // "LIVE" DATA
+    uint32_t currentSector;
+    uint8_t sectorFlags;
+    uint32_t rootDirectorySize;
+    uint8_t buffer[512];
 } TFInfo;
 
 /////////////////////////////////////////////////////////////////////////////////
 
 typedef struct struct_TFFILE {
-	uint32_t parentStartCluster;
-	uint32_t startCluster;
-	uint32_t currentClusterIdx;
-	uint32_t currentCluster;
-	short currentSector;
-	short currentByte;
-	uint32_t pos;
-	uint8_t flags;
-	uint8_t attributes;
-	uint8_t mode;
-	uint32_t size;
-	uint8_t filename[TF_MAX_PATH];
+    uint32_t parentStartCluster;
+    uint32_t startCluster;
+    uint32_t currentClusterIdx;
+    uint32_t currentCluster;
+    short currentSector;
+    short currentByte;
+    uint32_t pos;
+    uint8_t flags;
+    uint8_t attributes;
+    uint8_t mode;
+    uint32_t size;
+    uint8_t filename[TF_MAX_PATH];
 } TFFile;
 
 
@@ -143,7 +143,8 @@ int tf_create(uint8_t *filename);
 void tf_release_handle(TFFile *fp);
 TFFile *tf_parent(uint8_t *filename, const uint8_t *mode, int mkParents);
 int tf_shorten_filename(uint8_t *dest, uint8_t *src, uint8_t num);
-	// New frontend functions
+
+// New frontend functions
 int tf_init();
 int tf_fflush(TFFile *fp);
 int tf_fseek(TFFile *fp, int32_t base, long offset);
