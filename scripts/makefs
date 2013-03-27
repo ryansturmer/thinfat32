@@ -16,7 +16,10 @@ case "$1" in
 	mkdir fs
 	mount -o loop -tvfat test.fat32 ./fs ;;
     'unmount')
-	sudo umount ./fs ;;
+    mkdir -p ./fs
+	sudo umount ./fs
+    echo 'continuing'
+    ;;
     'populate')
         cd fs
 	echo "Medium sized filename on this one." > thisisamidsizefilename.txt

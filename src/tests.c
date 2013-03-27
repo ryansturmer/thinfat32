@@ -20,28 +20,30 @@ int main(int argc, char **argv) {
 	char data;
 	int rc;
 
-	printf("FAT32 Filesystem Test\n");
-	printf("-----------------------\n");
+	printf("\r\nFAT32 Filesystem Test");
+	printf("\r\n-----------------------");
 	tf_init();
 
 	// BASIC WRITE, Root directory, LFN
+    printf("\r\n[TEST] Basic LFN write test ") ;
 	if(rc = test_basic_write("/test_longfilename0.txt", "Hello, World!")) {
-		printf("[TEST] Basic LFN write test failed with error code 0x%x\n", rc) ;
-	}else { printf("[TEST] Basic LFN write test PASSED.\n"); }
+		printf("failed with error code 0x%x", rc) ;
+	}else { printf(" PASSED."); }
 
 	// BASIC READ, Root directory, LFN
+    printf("\r\n[TEST] Basic LFN read test ") ;
 	if(rc = test_basic_read("/test_longfilename0.txt", "Hello, World!")) {
-		printf("[TEST] Basic LFN read test failed with error code 0x%x\n", rc) ;
-	}else { printf("[TEST] Basic LFN read test PASSED.\n"); }
+		printf("failed with error code 0x%x", rc) ;
+	}else { printf(" PASSED.\n"); }
 
 	// BASIC WRITE, Root directory, 8.3 filename
 	if(rc = test_basic_write("/test0.txt", "Hello, World!")) {
-		printf("[TEST] Basic 8.3 write test failed with error code 0x%x\n", rc);
-	}else { printf("[TEST] Basic 8.3 write test PASSED.\n"); }
+		printf("\r\n[TEST] Basic 8.3 write test failed with error code 0x%x", rc);
+	}else { printf("\r\n[TEST] Basic 8.3 write test PASSED."); }
 	// BASIC READ, Root directory, 8.3 filename
 	if(rc = test_basic_read("/test0.txt", "Hello, World!")) {
-		printf("[TEST] Basic 8.3 read test failed with error code 0x%x\n", rc) ;
-	}else { printf("[TEST] Basic 8.3 read test PASSED.\n"); }
+		printf("\r\n[TEST] Basic 8.3 read test failed with error code 0x%x", rc) ;
+	}else { printf("\r\n[TEST] Basic 8.3 read test PASSED."); }
 	
 	return 0;
 }
