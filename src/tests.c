@@ -63,8 +63,8 @@ int test_basic_read(char *input_file, char *expected) {
     if(fp) {
         while(!tf_fread(&(data[i]), 1, fp)) {i+=1;}
         data[i+1] = '\x00';
-        printf("\r\n\r\nexpected: %s", expected);
-        printf("\r\n\r\nreceived: %s", data);
+        //printf("\r\n\r\nexpected: %s", expected);
+        //printf("\r\n\r\nreceived: %s", data);
         if(strcmp(data, expected)) {
             tf_fclose(fp);
             return DATA_MISMATCH_ERROR;

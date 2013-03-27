@@ -38,7 +38,7 @@ $(OBJS) : $(OBJ_DIR)/%.o : %.c
 	$(CC) -I$(INCLUDES) -c $(CFLAGS) $< -o $@ 
 	@echo
 
-tests : CFLAGS += -D TF_DEBUG -D DEBUG
+# tests : CFLAGS += -D TF_DEBUG -D DEBUG
 tests : $(OBJS)
 	@echo
 	@echo "Creating Test Fixture"
