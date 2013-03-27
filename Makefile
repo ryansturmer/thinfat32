@@ -38,17 +38,18 @@ $(OBJS) : $(OBJ_DIR)/%.o : %.c
 	$(CC) -I$(INCLUDES) -c $(CFLAGS) $< -o $@ 
 	@echo
 
+# tests : CFLAGS += -D TF_DEBUG -D DEBUG
 tests : $(OBJS)
 	@echo
 	@echo "Creating Test Fixture"
 	@echo "---------------------"
 	$(CC) $(CFLAGS) $(OBJS)  --output $(BUILD_DIR)/$@ $(LDFLAGS)
 	@echo
-clean:  
+clean :  
 	@echo
 	@echo "Cleaning the Build"
 	@echo "------------------"	
-	rm -rf $(OBJS) core fs $(BUILD_DIR)/* $(DIST_DIR)/fat32.tar.gz
+	rm -rf $(OBJS) core $(BUILD_DIR)/* $(DIST_DIR)/fat32.tar.gz
 	@echo
 
 test : tests
@@ -59,7 +60,7 @@ test : tests
 	./build/tests
 	@echo
 
-dist: clean
+dist : clean
 	tar -cv src scripts Makefile | gzip -c > $(DIST_DIR)/fat32.tar.gz
 	@echo
 #
