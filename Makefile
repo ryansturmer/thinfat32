@@ -15,7 +15,7 @@ SRC = thinfat32.c fat32_ui.c tests.c
 OBJS = $(SRC:%.c=$(OBJ_DIR)/%.o)
 
 VPATH = $(SRC_DIR)
-all: begin tests end
+all: | begin tests end
 
 begin:
 	@echo 
